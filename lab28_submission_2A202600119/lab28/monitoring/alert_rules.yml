@@ -1,0 +1,20 @@
+groups:
+  - name: lab28-platform
+    rules:
+      - alert: ApiGatewayDown
+        expr: up{job="api-gateway"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: API Gateway is down
+          description: Prometheus cannot scrape the API Gateway metrics endpoint.
+
+      - alert: ApiGatewayHighLatency
+        expr: histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job="api-gateway"}[5m]))) > 2
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: API Gateway p95 latency is high
+          description: API Gateway p95 latency has stayed above 2 seconds for more than 2 minutes.
